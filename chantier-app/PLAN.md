@@ -13,6 +13,12 @@ ouvriers.
 | Dépassement du métré | Demande bloquée : motif obligatoire, puis validation par le bureau, avec alerte |
 | Pointage | Le chef de chantier pointe toute son équipe depuis son téléphone, avec position GPS |
 | Support | Web pour le bureau, mobile installable pour le chantier |
+| Pays | Plusieurs pays : chaque chantier a sa devise et son fuseau horaire |
+| Langues | Français et anglais, au choix de chaque utilisateur |
+| Tolérance d'inventaire | Paramétrable : valeur par défaut, modifiable par chantier et par matériau |
+| Correction du pointage | Le chef peut corriger aujourd'hui et hier ; ensuite, seul le bureau |
+| Avancement | Saisi par le chef, validé par le conducteur de travaux |
+| Hébergement | Cloud, fournisseur choisi à la mise en service ; photos et documents dans un stockage en ligne |
 
 ## Rôles
 
@@ -67,7 +73,7 @@ ouvriers.
 
 | Fonction | Ce qu'elle fait | Contrôle |
 |---|---|---|
-| Avancement | Le chef indique chaque semaine le % fait par ouvrage, avec historique | Alerte si les matériaux posés ne correspondent pas à l'avancement (ex. 60 % du carrelage posé pour 30 % fait) |
+| Avancement | Le chef propose chaque semaine le % fait par ouvrage ; le conducteur valide ou corrige. Historique conservé. Le budget et les alertes utilisent la valeur validée | Alerte si les matériaux posés ne correspondent pas à l'avancement (ex. 60 % du carrelage posé pour 30 % fait) |
 | Planning | Dates prévues et réelles par ouvrage | Retards en rouge |
 | Budget | Prévu (métré × prix + main-d'œuvre prévue) comparé au dépensé (livraisons + journées pointées) | Alerte si on dépense plus vite qu'on avance |
 | Journal de chantier | Une page par jour : météo, travaux, incidents, photos ; effectif repris du pointage | Non modifiable après quelques jours |
@@ -76,6 +82,15 @@ ouvriers.
 
 ### Paramétrage à ajouter
 
+- **Plusieurs pays** : devise et fuseau horaire sur chaque chantier (pointage, journal,
+  budget et valeurs de stock dans la devise du chantier). Les totaux qui regroupent
+  plusieurs chantiers sont présentés par devise, sans conversion automatique.
+- **Tolérance d'inventaire paramétrable** sur trois niveaux : valeur par défaut de
+  l'entreprise, remplacée si besoin par une valeur propre au chantier, puis au matériau
+  (ex. le sable en vrac tolère plus d'écart que le carrelage).
+- **Français et anglais** : tous les textes de l'interface, des alertes, des messages
+  d'erreur et des exports existent dans les deux langues ; chaque utilisateur choisit la
+  sienne.
 - **Écran « Paramètres »** pour le bureau : devise, fuseau horaire, tolérance d'inventaire,
   délai de correction du pointage, horaires et pause habituels, seuils de gravité des
   alertes, taux de perte par défaut par type de matériau, nom, logo et coordonnées de
@@ -110,7 +125,9 @@ ouvriers.
 
 ## Étape 5 : mise en service
 
-- Docker : application + base PostgreSQL + stockage des fichiers et photos.
+- Docker : application + base PostgreSQL, installable chez n'importe quel hébergeur cloud.
+- Photos et documents dans un stockage en ligne compatible S3 (proposé par la plupart des
+  hébergeurs), avec un stockage sur disque pour les tests.
 - Guide d'installation et guide de démarrage en français.
 - Données de démonstration (chantier, métré de salle de bain, ouvriers).
 - Sauvegarde automatique de la base et des photos.
@@ -142,10 +159,5 @@ ouvriers et les documents.
 
 ## Questions ouvertes
 
-1. Pays : fuseau horaire et devise par défaut.
-2. Langue : français seul, ou aussi l'arabe ?
-3. Tolérances : 2 % de manquant à l'inventaire, correction du pointage limitée à
-   aujourd'hui et hier. À confirmer.
-4. Avancement : saisi par le chef seul, ou validé par le conducteur ?
-5. Photos et documents : sur le serveur ou dans un stockage en ligne ?
-6. Hébergement : serveur de l'entreprise, hébergeur cloud, ou à décider plus tard ?
+Aucune : les six questions ont reçu une réponse (voir « Décisions prises »).
+Reste à choisir l'hébergeur cloud au moment de la mise en service.
