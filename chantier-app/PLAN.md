@@ -9,7 +9,8 @@ ouvriers.
 | Sujet | Décision |
 |---|---|
 | Approche | Nouvelle application indépendante (pas de reprise du code d'Afribat, sous licence AGPL) |
-| Technique | FastAPI + SQLAlchemy + PostgreSQL (backend), React (frontend), PWA |
+| Technique | 100 % Cloudflare : API Hono sur Workers, base D1, fichiers sur R2, interface React installable (PWA), tout en TypeScript, dans un nouveau dépôt. Le code Python de `backend/` sert de spécification et de jeu de tests à porter |
+| Approche produit | Le produit suit le parcours d'un chantier en 6 étapes (voir ci-dessous), inspiré du découpage en processus d'OpenConstruction Academy |
 | Dépassement du métré | Demande bloquée : motif obligatoire, puis validation par le bureau, avec alerte |
 | Pointage | Le chef de chantier pointe toute son équipe depuis son téléphone, avec position GPS |
 | Support | Web pour le bureau, mobile installable pour le chantier |
@@ -18,7 +19,30 @@ ouvriers.
 | Tolérance d'inventaire | Paramétrable : valeur par défaut, modifiable par chantier et par matériau |
 | Correction du pointage | Le chef peut corriger aujourd'hui et hier ; ensuite, seul le bureau |
 | Avancement | Saisi par le chef, validé par le conducteur de travaux |
-| Hébergement | Cloud, fournisseur choisi à la mise en service ; photos et documents dans un stockage en ligne |
+| Hébergement | Cloudflare (Workers, D1, R2) |
+| Situations de travaux | En V2, pour garder la V1 simple |
+
+## Approche : le parcours d'un chantier en 6 étapes
+
+L'application est organisée comme la vie d'un chantier, pas en modules techniques.
+Chaque chantier affiche une barre d'étapes et, pour chaque étape, une courte liste
+« à faire » cochée automatiquement.
+
+| Étape | Ce qu'on y fait | Terminée quand… |
+|---|---|---|
+| 1. Définir | Fiche, position GPS, encadrement, ouvrages (ou copie d'un modèle), documents | le chef et le conducteur sont nommés et les ouvrages créés |
+| 2. Chiffrer | Catalogue, métré, pertes, montant prévu | chaque ouvrage a son métré |
+| 3. Planifier | Dates des ouvrages, affectation des ouvriers | les dates sont posées et l'équipe affectée |
+| 4. Acheter | Demandes contrôlées par le métré, validation, commandes, réceptions | continue pendant tout le chantier |
+| 5. Construire | Pointage, pose, inventaire, journal, avancement, budget, alertes anti-fuite | continue jusqu'à la fin |
+| 6. Clôturer | Inventaire final, retour du surplus, bilan prévu / réel, archivage | le bilan est validé par le bureau |
+
+- **Ordre de livraison** : par tranches complètes, pas étape par étape. La version pilote
+  contient le minimum de chaque étape pour qu'un chantier tourne de bout en bout.
+- **Le chef de chantier** ne voit que les étapes 4 et 5 : son accueil à 4 gros boutons ne change pas.
+- **Menu de l'ordinateur** réduit à 5 entrées : Tableau de bord, Chantiers, Fichiers, Alertes, Paramètres.
+- **Hors périmètre** de la version 1 : la conception (BIM, carbone), les appels d'offres
+  complets, les contrats complexes, la gestion des risques.
 
 ## Rôles
 
@@ -36,11 +60,14 @@ ouvriers.
 |---|---|
 | Modèle de données, règles de stock et de pointage, API (`backend/`) | ✅ Écrits |
 | Tests des règles de stock (`backend/tests/test_fuite_stock.py`) | ✍️ Écrits, pas encore lancés |
-| Tout le reste | ⏳ À faire |
+| Maquettes : 30 écrans (téléphone, ordinateur, paramétrage, parcours, clôture) | ✅ [Maquettes](https://claude.ai/artifact/KJjshhk45kFVv21tQQNRGF) |
+| Carte mentale des fonctions, par étape | ✅ [Carte](https://claude.ai/artifact/FX3kEBNXbdtp9S5t7HRX3h) |
+| Backlog : 98 stories, 332 points en V1 + 37 en V2, 14 sprints | ✅ [Backlog](https://claude.ai/artifact/1pBFUKwEtbaHYTr3wfzPRK) |
+| Application sur Cloudflare | ⏳ À faire (nouveau dépôt à créer) |
 
 ---
 
-## Étape 1 : vérifier ce qui est écrit
+## Phase de travail 1 : vérifier ce qui est écrit
 
 - [ ] Lancer les tests des règles de stock et corriger les erreurs.
 - [ ] Écrire et lancer les tests du pointage : double pointage, pointage loin du chantier,
@@ -48,7 +75,7 @@ ouvriers.
 - [ ] Tester les droits : un chef ne voit que ses chantiers, ne modifie pas le métré,
       ne valide pas ses propres demandes, n'efface pas les alertes.
 
-## Étape 2 : compléter les fonctions
+## Phase de travail 2 : compléter les fonctions
 
 ### Déjà écrit (à vérifier à l'étape 1)
 
@@ -105,7 +132,7 @@ ouvriers.
 - **Modèle de chantier** : créer un chantier en copiant les ouvrages, le métré et le
   planning d'un chantier existant ou d'un modèle (ex. « Villa R+1 type »).
 
-## Étape 3 : l'interface web et mobile
+## Phase de travail 3 : l'interface web et mobile
 
 - **Écrans de base** : connexion, tableau de bord, chantiers, métré, suivi des matériaux
   (prévu, demandé, livré, posé), demandes (avec le reste disponible affiché pendant la
@@ -116,30 +143,29 @@ ouvriers.
 - **Écrans de paramétrage** : paramètres, assistant de démarrage, import Excel, création
   de chantier depuis un modèle.
 
-## Étape 4 : usage sur chantier
+## Phase de travail 4 : usage sur chantier
 
 - Installation sur l'écran d'accueil du téléphone.
 - Pointage et journal hors connexion, envoyés quand le réseau revient.
 - Photos prises avec le téléphone et compressées automatiquement.
 - Vérification de l'affichage sur petit écran.
 
-## Étape 5 : mise en service
+## Phase de travail 5 : mise en service
 
-- Docker : application + base PostgreSQL, installable chez n'importe quel hébergeur cloud.
-- Photos et documents dans un stockage en ligne compatible S3 (proposé par la plupart des
-  hébergeurs), avec un stockage sur disque pour les tests.
+- Déploiement automatique sur Cloudflare (recette et production) : Workers, D1, R2.
+- Clôture d'un chantier : inventaire final, retour du surplus, bilan prévu / réel, archivage.
 - Guide d'installation et guide de démarrage en français.
 - Données de démonstration (chantier, métré de salle de bain, ouvriers).
 - Sauvegarde automatique de la base et des photos.
 
-## Plus tard (deuxième version)
+## Plus tard (deuxième version), rangé par étape
 
-- Facturation du client (situations de travaux).
-- Sous-traitants.
-- Sécurité (HSE).
-- Engins et matériel.
-- Notifications SMS, WhatsApp ou e-mail pour les alertes critiques.
-- Pointage individuel des ouvriers (QR code ou badge).
+| Étape | Ajouts prévus |
+|---|---|
+| 4. Acheter | Consultation de plusieurs fournisseurs et comparaison des prix |
+| 5. Construire | Avenants (travaux modificatifs), situations de travaux et retenue de garantie, trésorerie prévisionnelle, incidents de sécurité |
+| 6. Clôturer | Réserves (liste des défauts à reprendre avant la réception) |
+| Socle | Sous-traitants, engins, notifications SMS ou WhatsApp, pointage individuel (QR code ou badge) |
 
 ---
 
